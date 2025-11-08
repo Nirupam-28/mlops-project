@@ -27,7 +27,7 @@ jobs:
         pip install -U pip
         pip install fastapi uvicorn scikit-learn pandas joblib numpy pyngrok
 
-    # 4️⃣ Train model (optional)
+    # 4️⃣ Train model
     - name: Train model
       run: python train.py
 
@@ -44,5 +44,6 @@ from pyngrok import ngrok
 url = ngrok.connect(8000)
 print(f"🌐 Public API URL: {url.public_url}")
 print("✅ Visit / to test FastAPI, or /docs for Swagger UI.")
-import time; time.sleep(3600)  # Keep it alive for 1 hour
+import time
+time.sleep(3600)  # Keep server alive for 1 hour
 PYCODE
