@@ -40,7 +40,6 @@ jobs:
         nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
         sleep 8
         echo "from pyngrok import ngrok; \
-url = ngrok.connect(8000); \
-print(f'🌐 Public API URL: {url.public_url}'); \
-print('✅ Visit /docs for Swagger UI'); \
-import time; time.sleep(3600)" | python
+        url = ngrok.connect(8000);
+        echo "public API URL"
+        echo url.public_url
