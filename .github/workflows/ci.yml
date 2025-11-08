@@ -1,0 +1,48 @@
+name: Diabetes Model CI + Public Test URL
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  run-api:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2️⃣ Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # 3️⃣ Install dependencies
+    - name: Install dependencies
+      run: |
+        pip install -U pip
+        pip install fastapi uvicorn scikit-learn pandas joblib numpy pyngrok
+
+    # 4️⃣ Train model (optional)
+    - name: Train model
+      run: python train.py
+
+    # 5️⃣ Start FastAPI app and expose it with ngrok
+    - name: Start FastAPI with ngrok
+      env:
+        NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+      run: |
+        echo "🚀 Starting FastAPI server and exposing it via ngrok..."
+        nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+        sleep 8
+        python - <<'PYCODE'
+from pyngrok import ngrok
+url = ngrok.connect(8000)
+print(f"🌐 Public API URL: {url.public_url}")
+print("✅ Visit / to test FastAPI, or /docs for Swagger UI.")
+import time; time.sleep(3600)  # Keep it alive for 1 hour
+PYCODE
