@@ -39,11 +39,8 @@ jobs:
         echo "🚀 Starting FastAPI server and exposing it via ngrok..."
         nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
         sleep 8
-        python - <<'PYCODE'
-from pyngrok import ngrok
-url = ngrok.connect(8000)
-print(f"🌐 Public API URL: {url.public_url}")
-print("✅ Visit / to test FastAPI, or /docs for Swagger UI.")
-import time
-time.sleep(3600)  # Keep server alive for 1 hour
-PYCODE
+        echo "from pyngrok import ngrok; \
+url = ngrok.connect(8000); \
+print(f'🌐 Public API URL: {url.public_url}'); \
+print('✅ Visit /docs for Swagger UI'); \
+import time; time.sleep(3600)" | python
