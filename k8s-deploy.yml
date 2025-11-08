@@ -15,6 +15,7 @@ spec:
       containers:
       - name: diabetes-container
         image: diabetes-api:latest
+        imagePullPolicy: Never    # 👈 ensures it uses local Minikube image
         ports:
         - containerPort: 8000
 ---
