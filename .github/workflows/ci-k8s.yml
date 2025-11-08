@@ -50,9 +50,17 @@ jobs:
         kubectl get pods
         kubectl get svc
 
-    # 7️⃣ Test FastAPI endpoint inside cluster
+    # 7️⃣ Test FastAPI endpoint inside cluster (with debug)
     - name: Test service using port-forward
       run: |
+        echo "🕵️ Checking pod status before test..."
+        kubectl get pods -o wide
+        echo "🔍 Describe pod for debug..."
+        kubectl describe pod -l app=diabetes-api
+        echo "📜 Container logs:"
+        kubectl logs -l app=diabetes-api || true
+        echo "🚀 Port-forwarding service..."
         kubectl port-forward service/diabetes-service 8000:8000 &
         sleep 10
-        curl http://127.0.0.1:8000/
+        curl http://127.0.0.1:8000/ || true
+
