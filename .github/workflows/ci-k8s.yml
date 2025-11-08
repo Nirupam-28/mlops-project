@@ -1,0 +1,58 @@
+name: CI with Minikube Kubernetes Deployment
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2️⃣ Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # 3️⃣ Install dependencies and train model
+    - name: Install dependencies and train model
+      run: |
+        pip install -U pip
+        pip install fastapi uvicorn scikit-learn pandas joblib numpy
+        python train.py
+
+    # 4️⃣ Set up Minikube
+    - name: Start Minikube
+      uses: medyagh/setup-minikube@latest
+      with:
+        kubernetes-version: "v1.30.0"
+
+    # 5️⃣ Build Docker image inside Minikube
+    - name: Build Docker image in Minikube
+      run: |
+        eval $(minikube -p minikube docker-env)
+        docker build -t diabetes-api:latest .
+
+    # 6️⃣ Deploy FastAPI app to Minikube
+    - name: Deploy to Minikube
+      run: |
+        kubectl apply -f k8s-deploy.yml
+        echo "✅ Deployment applied successfully!"
+        echo "Waiting for pods to be ready..."
+        kubectl wait --for=condition=ready pod -l app=diabetes-api --timeout=90s
+        kubectl get pods
+        kubectl get svc
+
+    # 7️⃣ Test FastAPI endpoint inside cluster
+    - name: Test service using port-forward
+      run: |
+        kubectl port-forward service/diabetes-service 8000:8000 &
+        sleep 10
+        curl http://127.0.0.1:8000/
